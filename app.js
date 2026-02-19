@@ -1,9 +1,4 @@
-// PlasmaMemBRAIN v0.7.1
-// Core: random molecule -> show structure + given properties -> student inputs -> check -> reveal -> next
-// v0.6 changes ONLY (from working v0.5):
-// (1) "Almost there…" uses v0.3 logic, but CORRECT/REVISE instead of emojis
-// (2) Thresholds paragraph is handled in index.html (UI only)
-// (3) Lipinski HBA = (#N + #O) from MolecularFormula (separate PubChem request; falls back safely)
+// PlasmaMemBRAIN v0.7.3
 
 let cidPool = [];
 let current = null;
@@ -66,6 +61,29 @@ function toggleCycle(btn) {
     btn.classList.remove("yes", "no");
   }
 }
+
+function setToggleState(btn, desired) {
+  // desired: true/false (preferred) or "yes"/"no"/"unset"/null
+  let state = "unset";
+  if (desired === true || desired === "yes") state = "yes";
+  else if (desired === false || desired === "no") state = "no";
+
+  btn.dataset.state = state;
+
+  if (state === "yes") {
+    btn.textContent = "✅";
+    btn.classList.add("yes");
+    btn.classList.remove("no");
+  } else if (state === "no") {
+    btn.textContent = "❌";
+    btn.classList.add("no");
+    btn.classList.remove("yes");
+  } else {
+    btn.textContent = "—";
+    btn.classList.remove("yes", "no");
+  }
+}
+
 
 function resetUIForNewMolecule() {
   isRevealed = false;
@@ -346,6 +364,15 @@ function revealAnswer() {
   replaceInputWithAns("nrot_guess", "nrot_ans", Number($("nrot_ans").dataset.actual));
   replaceInputWithAns("hba_actual_guess", "hba_actual_ans", Number($("hba_actual_ans").dataset.actual));
   replaceInputWithAns("hbd_actual_guess", "hbd_actual_ans", Number($("hbd_actual_ans").dataset.actual));
+
+// Auto-set compliance toggles to the correct answers before locking them
+const expected = getExpectedComplianceUsingActuals();
+setToggleState($("mw_toggle"), expected.MW);
+setToggleState($("xlogp_toggle"), expected.XLOGP);
+setToggleState($("hba_toggle"), expected.HBA);
+setToggleState($("hbd_toggle"), expected.HBD);
+setToggleState($("nrot_toggle"), expected.NROT);
+setToggleState($("tpsa_toggle"), expected.TPSA);
 
   // Disable compliance toggles after reveal
   ["mw_toggle","xlogp_toggle","hba_toggle","hbd_toggle","nrot_toggle","tpsa_toggle"].forEach(id => {
