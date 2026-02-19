@@ -1,0 +1,413 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PlasmaMemBRAIN v0.7</title>
+  <style>
+    :root{
+      --bg:#070913;
+      --panel:#0b1022;
+      --ink:#e9ecff;
+      --muted:#9aa3c7;
+      --grid:rgba(255,255,255,0.08);
+      --neon:#7c5cff;
+      --neon2:#00f5ff;
+      --warn:#ffb020;
+      --bad:#ff4d6d;
+      --ok:#2cff9a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    html, body { height:100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(124,92,255,0.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 30%, rgba(0,245,255,0.12), transparent 60%),
+        radial-gradient(900px 700px at 60% 95%, rgba(255,77,109,0.08), transparent 55%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    .wrap{
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 22px 16px 40px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .brand{ line-height:1.05; }
+    .title{
+      font-weight: 850;
+      letter-spacing: 0.6px;
+      font-size: 28px;
+      text-shadow: 0 0 18px rgba(124,92,255,0.25);
+    }
+    .subtitle{
+      margin-top:6px;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 680px;
+    }
+    .version{
+      font-family: var(--mono);
+      color: rgba(0,245,255,0.9);
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .pill{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--grid);
+      background: rgba(255,255,255,0.03);
+      padding: 8px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .thresholds{
+
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--grid);
+      background: rgba(0,0,0,0.18);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      text-align: left;
+    }
+
+    .thresholds p{ margin: 0 0 8px; }
+    .thresholds p:last-child{ margin-bottom: 0; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items:start;
+    }
+
+    .card{
+      border: 1px solid var(--grid);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 0 0 1px rgba(124,92,255,0.06), 0 12px 30px rgba(0,0,0,0.35);
+    }
+
+    .card h3{
+      margin: 4px 0 10px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.25px;
+      color: rgba(233,236,255,0.92);
+    }
+
+    .meta{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .name{
+      font-weight: 800;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    .cidline{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .cidline a{ color: rgba(0,245,255,0.9); text-decoration:none; }
+    .cidline a:hover{ text-decoration:underline; }
+
+    .structure{
+      display:flex;
+      justify-content:center;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--grid);
+      background: rgba(0,0,0,0.25);
+    }
+    .structure img{
+      max-width: 340px;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 0 18px rgba(0,245,255,0.12));
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 6px;
+      border: 1px solid var(--grid);
+      border-radius: 12px;
+      overflow:hidden;
+    }
+    th, td{
+      padding: 10px 10px;
+      border-bottom: 1px solid var(--grid);
+      vertical-align: middle;
+    }
+    th{
+      text-align:left;
+      color: rgba(233,236,255,0.9);
+      background: rgba(255,255,255,0.03);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.25px;
+    }
+    tr:last-child td{ border-bottom:none; }
+
+    .val{
+      font-family: var(--mono);
+      color: rgba(233,236,255,0.94);
+    }
+
+    input.num{
+      width: 120px;
+      padding: 8px 9px;
+      border-radius: 10px;
+      border: 1px solid rgba(124,92,255,0.35);
+      background: rgba(0,0,0,0.25);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 13px;
+      outline: none;
+    }
+    input.num:focus{
+      border-color: rgba(0,245,255,0.7);
+      box-shadow: 0 0 0 3px rgba(0,245,255,0.12);
+    }
+
+    .toggle{
+      min-width: 46px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--grid);
+      background: rgba(255,255,255,0.02);
+      color: var(--ink);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 14px;
+    }
+    .toggle.yes{ border-color: rgba(44,255,154,0.55); box-shadow: 0 0 0 3px rgba(44,255,154,0.08); }
+    .toggle.no { border-color: rgba(255,77,109,0.55); box-shadow: 0 0 0 3px rgba(255,77,109,0.08); }
+    .toggle:disabled{
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      align-items:center;
+    }
+    button.action{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(124,92,255,0.35);
+      background: rgba(124,92,255,0.14);
+      color: var(--ink);
+      cursor:pointer;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    button.action:hover{
+      border-color: rgba(0,245,255,0.6);
+      box-shadow: 0 0 0 3px rgba(0,245,255,0.10);
+    }
+    button.action:disabled{
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .feedback{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--grid);
+      background: rgba(0,0,0,0.20);
+      font-family: var(--mono);
+      font-size: 12px;
+      white-space: pre-wrap;
+      color: var(--muted);
+    }
+    .feedback.ok{ color: rgba(44,255,154,0.95); border-color: rgba(44,255,154,0.35); }
+    .feedback.warn{ color: rgba(255,176,32,0.95); border-color: rgba(255,176,32,0.35); }
+    .feedback.info{ color: rgba(0,245,255,0.90); border-color: rgba(0,245,255,0.30); }
+
+    .revealedNeon{
+      color: var(--neon2);
+      text-shadow:
+        0 0 6px rgba(0,245,255,0.8),
+        0 0 14px rgba(0,245,255,0.6),
+        0 0 22px rgba(0,245,255,0.4);
+      font-family: var(--mono);
+      font-weight: 900;
+    }
+
+    .note{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="title">PlasmaMemBRAIN <span class="version">v0.7</span></div>
+        <div class="subtitle">The MedChem Intuition Trainer</div>
+      </div>
+      <div class="pill">
+        🔥 Streak: <span id="streakCount">0</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="meta">
+          <div>
+            <div class="name" id="name">—</div>
+            <div class="cidline">
+              CID <span id="cid">—</span> · <a id="pubchemLink" href="#" target="_blank" rel="noreferrer">Open in PubChem</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="structure">
+          <img id="structure" alt="Structure"/>
+        </div>
+
+        <div class="thresholds">
+          <p><strong>Thresholds:</strong> Lipinski (MW ≤ 500 g/mol, cLogP ≤ 5, HBA ≤ 10, HBD ≤ 5) · Veber (N<sub>rot</sub> ≤ 10, TPSA ≤ 140 Å²).</p>
+          <p>Values are sourced from PubChem; HBA and HBD are calculated using the CACTVS toolkit, which applies a more chemically rigorous and structurally aware definition of hydrogen-bonding functionality.</p>
+          <p>In contrast, Lipinski’s original Rule of Five defines HBA as simply the total number of N and O atoms and HBD as the count of NH and OH groups.</p>
+          <p>🚧 The Lipinski-style HBD calculation here is pending, so PubChem’s value is used provisionally. 🚧</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Lipinski (Ro5) &amp; Veber</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:38%;">Property</th>
+              <th style="width:37%;">Value</th>
+              <th style="width:25%;">Compliance?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MW</td>
+              <td class="val" id="mw_val">—</td>
+              <td><button class="toggle" id="mw_toggle" data-state="unset">—</button></td>
+            </tr>
+            <tr>
+              <td>cLogP</td>
+              <td class="val" id="xlogp_val">—</td>
+              <td><button class="toggle" id="xlogp_toggle" data-state="unset">—</button></td>
+            </tr>
+            <tr>
+              <td>HBA</td>
+              <td>
+                <input class="num" id="hba_guess" type="number" min="0" placeholder="your input">
+                <span class="val" id="hba_ans" style="display:none;"></span>
+              </td>
+              <td><button class="toggle" id="hba_toggle" data-state="unset">—</button></td>
+            </tr>
+            <tr>
+              <td>HBD</td>
+              <td>
+                <input class="num" id="hbd_guess" type="number" min="0" placeholder="your input">
+                <span class="val" id="hbd_ans" style="display:none;"></span>
+              </td>
+              <td><button class="toggle" id="hbd_toggle" data-state="unset">—</button></td>
+            </tr>
+            <tr>
+              <td>N<sub>rot</sub></td>
+              <td>
+                <input class="num" id="nrot_guess" type="number" min="0" placeholder="your input">
+                <span class="val" id="nrot_ans" style="display:none;"></span>
+              </td>
+              <td><button class="toggle" id="nrot_toggle" data-state="unset">—</button></td>
+            </tr>
+            <tr>
+              <td>TPSA</td>
+              <td class="val" id="tpsa_val">—</td>
+              <td><button class="toggle" id="tpsa_toggle" data-state="unset">—</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:14px;">Actual Hydrogen Bonding (PubChem)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50%;">Property</th>
+              <th style="width:50%;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>HBA_actual</td>
+              <td>
+                <input class="num" id="hba_actual_guess" type="number" min="0" placeholder="your input">
+                <span class="val" id="hba_actual_ans" style="display:none;"></span>
+              </td>
+            </tr>
+            <tr>
+              <td>HBD_actual</td>
+              <td>
+                <input class="num" id="hbd_actual_guess" type="number" min="0" placeholder="your input">
+                <span class="val" id="hbd_actual_ans" style="display:none;"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="actions">
+          <button class="action" id="checkBtn">Check Correctness</button>
+          <button class="action" id="revealBtn" disabled>Reveal Answer</button>
+          <button class="action" id="nextBtn">Next Molecule</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="note">
+          Contact Mohammad Hajjar at UCI to report bugs, submit suggestions, or ask questions.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
